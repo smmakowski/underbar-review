@@ -204,6 +204,7 @@
       if (!iterator(item)) {
         checkTruth = false;
       }
+      return checkTruth;
     }, true);
   };
 
@@ -211,6 +212,13 @@
   // provided, provide a default one
   _.some = function(collection, iterator) {
     // TIP: There's a very clever way to re-use every() here.
+    for (var i = 0; i < collection.length; i++) {
+      if (_.every([collection[i]], iterator)) {
+        return true;
+      }
+    }
+
+    return false;
   };
 
 
@@ -233,11 +241,30 @@
   //     bla: "even more stuff"
   //   }); // obj1 now contains key1, key2, key3 and bla
   _.extend = function(obj) {
+    _.each(arguments, function(arg) {
+      _.each(arg, function(value, key) { 
+        obj[key] = value;
+      });
+      
+    });
+
+    return obj;
   };
 
   // Like extend, but doesn't ever overwrite a key that already
   // exists in obj
   _.defaults = function(obj) {
+    _.each(arguments, function(arg) {
+      _.each(arg, function(value, key) { 
+        if (obj[key] !== undefined) {
+          // do nothing
+        } else {
+          obj[key] = value;
+        }
+      });
+    });
+
+    return obj;
   };
 
 
@@ -281,6 +308,19 @@
   // already computed the result for the given argument and return that value
   // instead if possible.
   _.memoize = function(func) {
+
+    var results = {};
+
+    return function () {
+      var args = JSON.stringify(arguments);
+
+      if (results[args] === undefined) {
+        return results[args] = func.apply(this, arguments);
+      } else {
+        return results[args];
+      }
+    };
+
   };
 
   // Delays a function for the given number of milliseconds, and then calls
@@ -290,6 +330,16 @@
   // parameter. For example _.delay(someFunction, 500, 'a', 'b') will
   // call someFunction('a', 'b') after 500ms
   _.delay = function(func, wait) {
+    var args = [];
+
+    for (var i = 2; i < arguments.length; i++) {
+      args.push(arguments[i]);
+    }
+
+    setTimeout(function() {
+      func.apply(this, args);
+
+    }, wait);
   };
 
 
@@ -300,10 +350,24 @@
 
   // Randomizes the order of an array's contents.
   //
-  // TIP: This function's test suite will ask that you not modify the original
+  // TIP: This function's test  
+  // will ask that you not modify the original
   // input array. For a tip on how to make a copy of an array, see:
   // http://mdn.io/Array.prototype.slice
   _.shuffle = function(array) {
+    var copy = array.slice(0);
+    var shuffled = [];
+
+    while (copy.length > 0) {
+      var dc = Math.floor(Math.random() * 2);
+      if (dc === 0) {
+        shuffled.push(copy.pop());
+      } else if (dc === 1) {
+        shuffled.push(copy.shift());
+      }
+    }
+
+    return shuffled; 
   };
 
 
